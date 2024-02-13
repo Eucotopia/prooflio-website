@@ -1,10 +1,13 @@
 'use client'
 import ProjectCard from "./ProjectCard";
 import ProjectTag from "@/app/components/ProjectTag";
-import {useState} from "react";
+import {useRef, useState} from "react";
+import {motion, useInView} from "framer-motion";
 
 const ProjectsSection = () => {
     const [tag, setTag] = useState("All")
+    const ref = useRef(null)
+    const isInview = useInView(ref, {once: true})
     const handleTagClick = (tag: string) => {
         setTag(tag)
     }
@@ -67,22 +70,35 @@ const ProjectsSection = () => {
     const filteredProjects = projectsData.filter((project) =>
         project.tag.includes(tag)
     )
+    const cardVariants = {
+        initial: {y: 50, opacity: 0},
+        animate: {y: 0, opacity: 1},
+        exit: {y: -50, opacity: 0}
+    }
     return (
-        <>
+        <section>
             <h2 className={'text-center text-4xl font-bold text-white mt-4'}>My Projects</h2>
             <div className={"text-white flex flex-row justify-center items-center gap-2 py-6"}>
                 <ProjectTag name={'All'} onClick={handleTagClick} isSelected={tag === "All"}/>
                 <ProjectTag name={'Web'} onClick={handleTagClick} isSelected={tag === "Web"}/>
                 <ProjectTag name={'Mobile'} onClick={handleTagClick} isSelected={tag === "Mobile"}/>
             </div>
-            <div className={'grid md:grid-cols-3 gap-8 md:gap-12'}>
+            <ul ref={ref} className={'grid md:grid-cols-3 gap-8 md:gap-12'}>
                 {
                     filteredProjects.map((item, index) => (
-                        <ProjectCard key={index} title={item.title} description={item.description} imgUrl={item.image}/>
+                        <motion.li
+                            transition={{duration: 0.1, delay: index * 0.4}}
+                            key={index}
+                            initial={"initial"}
+                            animate={isInview ? "animate" : "initial"}
+                            variants={cardVariants}>
+                            <ProjectCard key={index} title={item.title} description={item.description}
+                                         imgUrl={item.image}/>
+                        </motion.li>
                     ))
                 }
-            </div>
-        </>
+            </ul>
+        </section>
     )
 }
 export default ProjectsSection
